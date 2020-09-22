@@ -3,7 +3,7 @@
 /**
  * Class ImageProcessor
  */
-class ImageProcessor extends AbstractPicoPlugin
+class PicoImageProcessor extends AbstractPicoPlugin
 {
     private array $sizes;
     private array $config;

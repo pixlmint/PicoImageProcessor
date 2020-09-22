@@ -50,7 +50,7 @@ sizes:
     1000: 1000
     max: 1080
 ```
-By default, all pictures in the `content` part of the page will be in the size 1000x[calculated height] 
+By default, all pictures in the `content` part of the page will be in the size `1000x[calculated height]` 
 
 Right now there is no way to change this, so the size `1000: 1000` is required, otherwise your site will break.
 

@@ -16,7 +16,7 @@ class PicoImageProcessor extends AbstractPicoPlugin
     public function __construct(Pico $pico)
     {
         parent::__construct($pico);
-        $this->sizes = ['thumb' => 200, '400' => 400, '500' => 500, 1000 => 1000];
+        $this->sizes = ['thumb' => 200, '400' => 400, '500' => 500, 1000 => 1000, 'max' => 1080];
         $this->config = [];
         $this->basePicturesPath = '/var/www/html/assets/pictures';
         $this->absoluteAssetsPath = '/var/www/html';
@@ -126,7 +126,7 @@ class PicoImageProcessor extends AbstractPicoPlugin
                     $thumbnail = imagescale($img, $size);
                     imagejpeg($thumbnail, $newStrPath);
                 } catch (\Exception $e) {
-                    echo($e);
+                    echo ($e);
                 }
             }
             $images[$key] = "${relativePath}/${key}/${filename}";

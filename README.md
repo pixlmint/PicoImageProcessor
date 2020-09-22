@@ -1,11 +1,18 @@
 # Pico Image Processor Plugin
 
+- [Pico Image Processor Plugin](#pico-image-processor-plugin)
+  - [Installation](#installation)
+    - [Git](#git)
+    - [Just the file](#just-the-file)
+  - [What does this Plugin do?](#what-does-this-plugin-do)
+  - [Versions](#versions)
+
 ## Installation
 ### Git
-Clone this repository into your `plugins` directory (`git clone https://github.com/christiangroeber/pico-image-processor.git`)
+Clone this repository into your `plugins` directory (`git clone https://github.com/christiangroeber/PicoImageProcessor.git`)
 
 ### Just the file
-Download the file `ImageProcessor.php` to your `plugins` directory 
+Download the file `PicoImageProcessor.php` to your `plugins` directory 
 
 ## What does this Plugin do?
 This Plugin takes existing Images and scales them down to your desired size.

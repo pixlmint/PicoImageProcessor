@@ -87,7 +87,7 @@ Type: `boolean`
 
 Allow downloading images that aren't served with a secure connection (the url begins with `http://`)
 
-<b>Important</b>: Is this set to false and you do try to display a file that isn't served over https, the page will break!
+<b>Important</b>: If this set to false and you do try to display a file that isn't served over https, the page will break!
 ```
 allow_unsafe_sources: false
 ```

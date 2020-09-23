@@ -5,50 +5,41 @@
  */
 class PicoImageProcessor extends AbstractPicoPlugin
 {
-    private array $sizes;
+    private array $sizes= ['thumb' => 200, '400' => 400, '500' => 500, 1000 => 1000, 'max' => 1080];
     private array $config;
-    private string $basePicturesPath;
-    private string $absoluteAssetsPath;
-    private string $relativePicturesPath;
-    private bool $downloadImages;
-    private bool $allowUnsafeSources;
+
+
+    private string $absoluteWebDirectory = '/var/www/html';
+    private string $relativePicturesPath = '/assets/pictures';
+    private string $relativeScaledImagePath = '/assets/thumbs';
+    private string $relativeDownloadsPath = '/assets/downloads';
+    private bool $downloadImages = true;
+    private bool $allowUnsafeSources = false;
+    protected $enabled = true;
 
     public function __construct(Pico $pico)
     {
         parent::__construct($pico);
-        $this->sizes = ['thumb' => 200, '400' => 400, '500' => 500, 1000 => 1000, 'max' => 1080];
         $this->config = [];
-        $this->basePicturesPath = '/var/www/html/assets/pictures';
-        $this->absoluteAssetsPath = '/var/www/html';
-        $this->relativePicturesPath = '/var/www/html/assets';
-        $this->downloadImages = true;
-        $this->allowUnsafeSources = false;
     }
 
     public function onConfigLoaded(array $config)
     {
-        if (key_exists('sizes', $config)) {
-            $this->sizes = $config['sizes'];
-        }
-        if (key_exists('pictures_path', $config)) {
-            $this->basePicturesPath = $config['pictures_path'];
-        }
-        if (key_exists('absolute_assets_path', $config)) {
-            $this->absoluteAssetsPath = $config['absolute_assets_path'];
-        }
-        if (key_exists('download_images', $config)) {
-            $this->downloadImages = $config['download_images'];
-        }
-        if (key_exists('allow_unsafe_sources', $config)) {
-            $this->allowUnsafeSources = $config['allow_unsafe_sources'];
-        }
-        $this->relativePicturesPath = $config['assets_url'] . 'pictures';
-
         $this->config = $config;
+        if (key_exists('PicoImageProcessor', $config)) {
+            foreach (get_object_vars($this) as $key => $val) {
+                if (key_exists($key, $config['PicoImageProcessor']) && $key !== 'config') {
+                    $this->$key = $config['PicoImageProcessor'][$key];
+                }
+            }
+        }
 
         foreach ($this->sizes as $key => $size) {
-            if (!is_dir($this->basePicturesPath . '/' . $key)) {
-                mkdir($this->basePicturesPath . '/' . $key);
+            $dir = $this->absoluteWebDirectory . $this->relativeScaledImagePath . '/' . $key;
+            if (!is_dir($dir)) {
+                if (!mkdir($dir, 0777, true)) {
+                    echo("Failed creating ${dir}<br>");
+                }
             }
         }
     }
@@ -85,15 +76,23 @@ class PicoImageProcessor extends AbstractPicoPlugin
 
     private function downloadImage(string $imageUrl)
     {
+        if (!is_dir($this->absoluteWebDirectory . $this->relativeDownloadsPath)) {
+            mkdir($this->absoluteWebDirectory . $this->relativeDownloadsPath, 0777, true);
+        }
         $original = file_get_contents($imageUrl);
         $filename = explode('/', $imageUrl);
         $filename = array_pop($filename);
-        $originalPath = $this->basePicturesPath . '/' . $filename;
+        $originalPath = $this->absoluteWebDirectory . $this->relativeDownloadsPath . '/' . $filename;
         file_put_contents($originalPath, $original);
 
         return $this->relativePicturesPath . '/' . $filename;
     }
 
+    /**
+     * @param string $imageUrl
+     * @return array
+     * @throws Exception
+     */
     private function createThumbnail(string $imageUrl): array
     {
         if (substr($imageUrl, 0, 4) === "http") {
@@ -113,23 +112,22 @@ class PicoImageProcessor extends AbstractPicoPlugin
         }
         $path = explode('/', $imageUrl);
         $filename = array_pop($path);
-        $relativePath = implode('/', $path);
-        $newPath = $this->absoluteAssetsPath . $relativePath;
+        $picturePath = $this->absoluteWebDirectory .  implode('/', $path);
 
         $images = [];
 
         foreach ($this->sizes as $key => $size) {
-            $newStrPath = $this->basePicturesPath . "/${key}/${filename}";
+            $newStrPath = $this->absoluteWebDirectory . $this->relativeScaledImagePath . "/${key}/${filename}";
             if (!is_file($newStrPath)) {
                 try {
-                    $img = imagecreatefromstring(file_get_contents("${newPath}/${filename}"));
+                    $img = imagecreatefromstring(file_get_contents("${picturePath}/${filename}"));
                     $thumbnail = imagescale($img, $size);
                     imagejpeg($thumbnail, $newStrPath);
                 } catch (\Exception $e) {
                     echo ($e);
                 }
             }
-            $images[$key] = "${relativePath}/${key}/${filename}";
+            $images[$key] = $this->relativeScaledImagePath . "/${key}/${filename}";
         }
 
         return $images;
